@@ -6,7 +6,7 @@ class Project < ApplicationRecord
   has_many :contents
 
   validates_presence_of :title, :project_type, :location, :thumbnail
-  validates_uniqueness_of :title
+  validates_uniqueness_of :title, scope: :user
 
   mount_uploader :thumbnail, ThumbnailUploader
 

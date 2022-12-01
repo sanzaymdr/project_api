@@ -5,4 +5,5 @@ class Content < ApplicationRecord
   belongs_to :project
 
   validates_presence_of :title, :body
+  validates_uniqueness_of :title, scope: :project_id
 end
