@@ -3,6 +3,7 @@
 # Project model to handle project
 class Project < ApplicationRecord
   belongs_to :user
+  has_many :contents
 
   validates_presence_of :title, :project_type, :location, :thumbnail
   validates_uniqueness_of :title
