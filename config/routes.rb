@@ -15,7 +15,10 @@ Rails.application.routes.draw do
         collection do
           get '/my_projects', to: 'projects#user_projects'
         end
+        resources :contents, only: %i[index create show]
       end
+
+      resources :contents, only: %i[destroy update]
     end
   end
 end
