@@ -4,8 +4,10 @@
 class Project < ApplicationRecord
   belongs_to :user
 
-  validates_presence_of :title, :type, :location, :thumbnail
+  validates_presence_of :title, :project_type, :location, :thumbnail
   validates_uniqueness_of :title
 
   mount_uploader :thumbnail, ThumbnailUploader
+
+  enum project_type: { in_house: 0, external: 1, international: 2 }
 end
