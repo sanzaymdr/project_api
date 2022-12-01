@@ -2,6 +2,8 @@
 
 # Controller to handle authorization using JWT
 class ApiController < ApplicationController
+  before_action :underscore_params!
+
   SECRET_KEY = Rails.application.secrets.secret_key_base.to_s
 
   def authorized
@@ -40,5 +42,9 @@ class ApiController < ApplicationController
 
   def logged_in?
     !!logged_in_user
+  end
+
+  def underscore_params!
+    params.deep_transform_keys!(&:underscore)
   end
 end
