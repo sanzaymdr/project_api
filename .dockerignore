@@ -1,0 +1,14 @@
+# Ignore bundler config.
+/.bundle
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+/public/uploads
+.byebug_history
+
+# IDE filess
+/.idea
+*.swo
+*.swp
+.vscode

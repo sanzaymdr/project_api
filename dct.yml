@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+  test:
+    build:
+      context: .
+      cache_from:
+        - product_api:latest
+    image: product_api:latest
+    volumes:
+      - .:/product_api
+    command: bundle exec rspec
+    env_file:
+      - '.env.test'
+    ports:
+      - "3000"
+    depends_on:
+      - db
+  db:
+    image: postgres:14.1
+    ports:
+      - "5432"
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
