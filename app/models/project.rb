@@ -6,4 +6,6 @@ class Project < ApplicationRecord
 
   validates_presence_of :title, :type, :location, :thumbnail
   validates_uniqueness_of :title
+
+  mount_uploader :thumbnail, ThumbnailUploader
 end
