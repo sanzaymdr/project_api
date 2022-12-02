@@ -7,22 +7,18 @@ module Api
       # REGISTER
       def sign_up
         user = User.create!(sign_up_params)
-        if user.valid?
-          token = encode_token({ user_id: user.id })
-          render json: { user:, token: }
-        end
+        render json: user, status: :created if user.valid?
       rescue ActiveRecord::RecordInvalid => e
-        render json: { error: e.message }
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       # LOGGING IN
       def sign_in
         user = User.find_by(email: sign_in_params[:email])
         if user&.authenticate(sign_in_params[:password])
-          token = encode_token({ user_id: user.id })
-          render json: { token: }
+          render json: user, status: :created
         else
-          render json: { error: 'Invalid email or password' }
+          render json: { error: 'Invalid email or password' }, status: :unprocessable_entity
         end
       end
 

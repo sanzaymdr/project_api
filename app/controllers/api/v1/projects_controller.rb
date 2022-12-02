@@ -11,58 +11,54 @@ module Api
       end
 
       def show
-        project = Project.where(id: params[:id])
-        return render json: serialized_project(project).first, status: :ok if project.any?
+        project = Project.find_by(id: project_params[:id])
+        return render json: project, status: :ok if project
 
         render json: { error: 'Record not found.' }, status: :not_found
       end
 
       def create
         project = Project.create!(project_params.merge(user: logged_in_user))
-        render json: project
+        render json: project, status: :created
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       def user_projects
-        associated_projects = serialized_project(logged_in_user&.projects)
-        render json: associated_projects
+        associated_projects = logged_in_user&.projects
+        render json: associated_projects, each_serializer: ProjectSerializer, exclude_owner: true
       end
 
       def update
-        if authorized_user?(retrieve_project)
+        if valid_user?(retrieve_project)
           retrieve_project.update!(project_params)
-          render json: { message: 'Project Updated' }
+          render json: retrieve_project
         else
-          render json: { error: 'You are not authorized to update.' }, status: :unauthorized
+          render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
         end
       end
 
       def destroy
-        if authorized_user?(retrieve_project)
+        if valid_user?(retrieve_project)
           retrieve_project.destroy!
-          render json: { message: 'Project deleted.' }
+          render json: { message: 'Deleted' }
         else
-          render json: { error: 'You are not authorized to delete' }, status: :unauthorized
+          render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
         end
       end
 
       private
 
-      def authorized_user?(project)
+      def valid_user?(project)
         project&.user == logged_in_user
       end
 
       def project_params
-        params.permit(:title, :description, :project_type, :location, :thumbnail)
+        params.permit(:id, :title, :description, :project_type, :location, :thumbnail)
       end
 
       def retrieve_project
-        @retrieve_project ||= Project.find_by(id: params[:id])
-      end
-
-      def serialized_project(projects)
-        projects.includes(:contents).map do |project|
-          project&.serializable_hash&.merge(contents: project.contents)
-        end
+        @retrieve_project ||= Project.find_by(id: project_params[:id])
       end
     end
   end

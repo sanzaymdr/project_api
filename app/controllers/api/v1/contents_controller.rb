@@ -23,9 +23,9 @@ module Api
       def create
         if valid_user?(retrieve_project)
           content = Content.create!(content_params)
-          render json: content, status: :ok
+          render json: content, status: :created
         else
-          render json: { error: 'You are not authorized to create content.' }
+          render json: { error: 'You are not authorized to create content.' }, status: :unauthorized
         end
       rescue StandardError => e
         render json: { error: e.message }, status: :unprocessable_entity
@@ -34,18 +34,18 @@ module Api
       def update
         if valid_user?(retrieve_project_content&.project)
           retrieve_project_content.update!(content_params)
-          render json: { message: 'Content Updated' }
+          render json: retrieve_project_content
         else
-          render json: { error: 'You are not authorized to update.' }, status: :unauthorized
+          render json: { error: 'Something went wrong. Please contact support' }, status: :unauthorized
         end
       end
 
       def destroy
         if valid_user?(retrieve_project_content&.project)
           retrieve_project_content.destroy!
-          render json: { message: 'Content deleted.' }
+          render json: { message: 'Deleted' }
         else
-          render json: { error: 'You are not authorized to delete' }, status: :unauthorized
+          render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
         end
       end
 
@@ -56,7 +56,7 @@ module Api
       end
 
       def retrieve_project_content
-        @retrieve_project_content ||= Content.find_by(id: params[:id])
+        @retrieve_project_content ||= Content.find_by(id: content_params[:id])
       end
 
       def valid_user?(project)
