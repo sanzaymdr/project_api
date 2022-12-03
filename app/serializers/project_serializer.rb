@@ -15,7 +15,8 @@ class ProjectSerializer < ActiveModel::Serializer
   end
 
   def thumbnail
-    object.thumbnail.url
+    base_url = 'http://localhost:3000/'
+    "#{base_url}#{object.thumbnail.url}"
   end
 
   def location
