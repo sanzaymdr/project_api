@@ -53,6 +53,15 @@ RSpec.describe Api::V1::ProjectsController do
 
         expect(JSON.parse(response.body)['data']['id']).to eq(project1.id.to_s)
       end
+
+      it 'returns serialized json-api' do
+        show
+
+        response_body = JSON.parse(response.body)
+        expect(response_body['data'].keys).to eq(%w[id type attributes])
+        expect(response_body['data']['attributes'].keys).to eq(%w[title thumbnail description
+                                                                  location projectType ownerName createdAt updatedAt])
+      end
     end
   end
 
@@ -90,15 +99,32 @@ RSpec.describe Api::V1::ProjectsController do
       before { request.headers.merge!(user1.create_test_auth_header) }
 
       context 'with valid params' do
+        it 'creates a new record in project table' do
+          expect { create }.to change { Project.count }.by(1)
+        end
+
         it 'returns created response' do
           create
 
           expect(response).to be_created
         end
+
+        it 'returns serialized json-api' do
+          create
+
+          response_body = JSON.parse(response.body)
+          expect(response_body['data'].keys).to eq(%w[id type attributes])
+          expect(response_body['data']['attributes'].keys).to eq(%w[title thumbnail description
+                                                                    location projectType ownerName createdAt updatedAt])
+        end
       end
 
       context 'with invalid params' do
         let(:params) {}
+
+        it 'does not create a new record in project table' do
+          expect { create }.to change { Project.count }.by(0)
+        end
 
         it 'returns unprocessable entity' do
           create
@@ -144,18 +170,34 @@ RSpec.describe Api::V1::ProjectsController do
 
         expect(JSON.parse(response.body)['data'].count).to eq(5)
       end
+
+      it 'returns serialized json-api' do
+        user_projects
+
+        response_body = JSON.parse(response.body)
+        expect(response_body['data'].first.keys).to eq(%w[id type attributes])
+        expect(response_body['data'].first['attributes'].keys).to eq(%w[title thumbnail description
+                                                                        location projectType createdAt updatedAt])
+      end
     end
   end
 
   describe 'PATCH #update' do
     let(:project) { FactoryBot.create(:project, user: user1) }
     let(:user1) { FactoryBot.create(:user) }
-    let(:params) { { id: project.id } }
+    let(:updated_title) { 'updated title' }
+    let(:params) { { id: project.id, title: updated_title } }
 
     subject(:update) { patch :update, params: }
 
     context 'when user is not logged-in/authenticated' do
       let(:error_response) { { message: 'Please log in' } }
+
+      it 'does not update the project record' do
+        update
+
+        expect(project.reload.title).not_to eq(updated_title)
+      end
 
       it 'returns unauthorized error' do
         update
@@ -174,6 +216,12 @@ RSpec.describe Api::V1::ProjectsController do
       context 'when user is owner of project' do
         before { request.headers.merge!(user1.create_test_auth_header) }
 
+        it 'updates the project record' do
+          update
+
+          expect(project.reload.title).to eq(updated_title)
+        end
+
         it 'returns successful response' do
           update
 
@@ -185,6 +233,12 @@ RSpec.describe Api::V1::ProjectsController do
         let(:user2) { FactoryBot.create(:user) }
 
         before { request.headers.merge!(user2.create_test_auth_header) }
+
+        it 'does not update the project record' do
+          update
+
+          expect(project.reload.title).not_to eq(updated_title)
+        end
 
         it 'returns unprocessable entity' do
           update
@@ -203,13 +257,17 @@ RSpec.describe Api::V1::ProjectsController do
 
   describe 'DELETE #destroy' do
     let(:user1) { FactoryBot.create(:user) }
-    let(:project) { FactoryBot.create(:project, user: user1) }
+    let!(:project) { FactoryBot.create(:project, user: user1) }
     let(:params) { { id: project.id } }
 
     subject(:destroy) { delete :destroy, params: }
 
     context 'when user is not logged-in/authenticated' do
       let(:error_response) { { message: 'Please log in' } }
+
+      it 'does not delete project record' do
+        expect { destroy }.to_not change(Project, :count)
+      end
 
       it 'returns unauthorized error' do
         destroy
@@ -228,6 +286,10 @@ RSpec.describe Api::V1::ProjectsController do
       context 'when user is owner of project' do
         before { request.headers.merge!(user1.create_test_auth_header) }
 
+        it 'deletes a project record' do
+          expect { destroy }.to change(Project, :count).by(-1)
+        end
+
         it 'returns successful response' do
           destroy
 
@@ -245,6 +307,10 @@ RSpec.describe Api::V1::ProjectsController do
         let(:user2) { FactoryBot.create(:user) }
 
         before { request.headers.merge!(user2.create_test_auth_header) }
+
+        it 'does not delete project record' do
+          expect { destroy }.to_not change(Project, :count)
+        end
 
         it 'returns unprocessable entity' do
           destroy
