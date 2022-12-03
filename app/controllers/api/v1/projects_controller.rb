@@ -5,14 +5,14 @@ module Api
     # Controller to handle projects
     class ProjectsController < ApiController
       before_action :authorized, except: %i[show index]
+      before_action :valid_user?, only: %i[update destroy]
 
       def index
         render json: Project.all
       end
 
       def show
-        project = Project.find_by(id: project_params[:id])
-        return render json: project, status: :ok if project
+        return render json: retrieve_project, status: :ok if retrieve_project
 
         render json: { error: 'Record not found.' }, status: :not_found
       end
@@ -30,28 +30,16 @@ module Api
       end
 
       def update
-        if valid_user?(retrieve_project)
-          retrieve_project.update!(project_params)
-          render json: retrieve_project
-        else
-          render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
-        end
+        retrieve_project.update!(project_params)
+        render json: retrieve_project
       end
 
       def destroy
-        if valid_user?(retrieve_project)
-          retrieve_project.destroy!
-          render json: { message: 'Deleted' }
-        else
-          render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
-        end
+        retrieve_project.destroy!
+        render json: { message: 'Deleted' }
       end
 
       private
-
-      def valid_user?(project)
-        project&.user == logged_in_user
-      end
 
       def project_params
         params.permit(:id, :title, :description, :project_type, :location, :thumbnail)
@@ -59,6 +47,12 @@ module Api
 
       def retrieve_project
         @retrieve_project ||= Project.find_by(id: project_params[:id])
+      end
+
+      def valid_user?
+        return if retrieve_project&.user == logged_in_user
+
+        render json: { error: 'Something went wrong. Please contact support' }, status: :unprocessable_entity
       end
     end
   end
