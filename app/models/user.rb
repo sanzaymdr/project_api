@@ -16,4 +16,8 @@ class User < ApplicationRecord
   def encode_token
     JWT.encode({ user_id: id }, Rails.application.secrets.secret_key_base.to_s)
   end
+
+  def create_test_auth_header
+    { Authorization: "Bearer #{encode_token}" }
+  end
 end
