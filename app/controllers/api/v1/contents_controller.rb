@@ -7,7 +7,7 @@ module Api
       before_action :authorized, :valid_user?, except: %i[index show]
 
       def index
-        content = Project.find_by(id: content_params[:project_id])&.contents
+        content = retrieve_project&.contents
         return render json: content, status: :ok if content
 
         render json: { error: 'Record not found.' }, status: :not_found
