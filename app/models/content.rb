@@ -6,4 +6,8 @@ class Content < ApplicationRecord
 
   validates_presence_of :title, :body
   validates_uniqueness_of :title, scope: :project_id
+
+  def associated_user
+    project&.user
+  end
 end
