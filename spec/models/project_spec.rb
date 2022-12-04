@@ -5,6 +5,40 @@ RSpec.describe Project, type: :model do
     let(:user1) { FactoryBot.create(:user) }
     let!(:project) { FactoryBot.create(:project, title: 'project_1', user: user1) }
 
+    subject do
+      described_class.new(
+        title: 'Anything',
+        project_type: 'external',
+        location: 'US',
+        thumbnail: Rack::Test::UploadedFile.new('spec/fixtures/files/thumbnail.jpg'),
+        user: user1
+      )
+    end
+
+    it 'is valid with valid attributes' do
+      expect(subject).to be_valid
+    end
+
+    it 'is not valid without a title' do
+      subject.title = nil
+      expect(subject).to_not be_valid
+    end
+
+    it 'is valid without a description' do
+      subject.description = nil
+      expect(subject).to be_valid
+    end
+
+    it 'is not valid without a project_type' do
+      subject.project_type = nil
+      expect(subject).to_not be_valid
+    end
+
+    it 'is not valid without a thumbnail' do
+      subject.thumbnail = nil
+      expect(subject).to_not be_valid
+    end
+
     context 'when project with title and user id already exists' do
       context 'when the user_id is same as existing project record' do
         subject { FactoryBot.create(:project, title: 'project_1', user: user1) }
