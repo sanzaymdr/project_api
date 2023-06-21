@@ -31,4 +31,3 @@ bash into the web container and run the following commands
 
 ### Postman API documentation
 * Import this [LINK](https://www.getpostman.com/collections/1a440d785548e22961d7) to your Postman App.
-
