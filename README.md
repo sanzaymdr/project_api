@@ -26,9 +26,8 @@ bash into the web container and run the following commands
   ```
 #### Run Unit Tests
 * `dct run test` to perform full unit tests.
-#### Additional Gems & Modification
+### Additional Gems & Modification
 * Please refer to this [Document](https://docs.google.com/document/d/1JIcfU03ZUZOiYag9DwCgLEffrmyNIZq-vX10DKcyzrI/edit?usp=sharing)
 
-#### Postman API documentation
+### Postman API documentation
 * Import this [LINK](https://www.getpostman.com/collections/1a440d785548e22961d7) to your Postman App.
-
